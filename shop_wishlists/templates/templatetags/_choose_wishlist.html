@@ -1,0 +1,7 @@
+{% load i18n %}
+<select id="id_select_wishlist" name="select_wishlist">
+  {% for wishlist in wishlists %}
+  <option value="{{ wishlist.id }}"{% ifequal wishlist.id active_wishlist %} selected="selected"{% endifequal %}>{{ wishlist.name }}</option>  
+  {% endfor %}
+  <option value="add_wishlist">{% trans "Add another wishlist" %}</option>
+</select>

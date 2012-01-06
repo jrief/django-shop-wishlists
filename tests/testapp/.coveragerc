@@ -1,0 +1,10 @@
+[run]
+branch = True
+source =
+    shop_wishlists
+omit =
+    ../../*migrations*
+    ../../*tests*
+    /usr/share/*
+[report]
+precision = 2
