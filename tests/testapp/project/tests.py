@@ -4,10 +4,10 @@ from django.test import TestCase
 from django.core import exceptions
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from shop_wishlists.models import Wishlist, WishlistItem 
-from shop_wishlists.utils import get_or_create_wishlist, is_product_on_active_wishlist, \
-        rename_active_wishlist, delete_active_wishlist
 from shop.tests.util import Mock
+from shop_wishlists.models import Wishlist, WishlistItem 
+from shop_wishlists.utils import *
+from shop_wishlists.templatetags.wishlisttags import select_wishlist
 from project.models import DiaryProduct
 from project.views import DiaryDetailView
 
@@ -27,6 +27,7 @@ class WishlistsTest(TestCase):
         self.product.long_description = 'test'
         self.product.unit_price = Decimal('1.0')
         self.product.save()
+        setattr(self.request, 'user', self.user)
 
     def test_get_templates_return_expected_values(self):
         view = DiaryDetailView()
@@ -34,15 +35,14 @@ class WishlistsTest(TestCase):
         tmp = view.get_template_names()
         self.assertEqual(len(tmp), 1)
 
-    def test_create_no_anonymous_wishlist(self):
+    def test_no_wishlist_for_anonymous_user(self):
         """Wishlists for anonymous users are not allowed"""
         setattr(self.request, 'user', None)
         self.assertRaises(exceptions.PermissionDenied, get_or_create_wishlist, self.request)
-                          #wishlist, getattr(self.request, '_wishlist'))
+        self.assertRaises(exceptions.PermissionDenied, create_additional_wishlist, self.request)
 
     def test_create_wishlist(self):
         """Asking for a wishlist twice, shall create only one"""
-        setattr(self.request, 'user', self.user)
         wishlist = get_or_create_wishlist(self.request)
 
         # check that wishlist is stored in request
@@ -61,12 +61,12 @@ class WishlistsTest(TestCase):
         setattr(request, 'session', {})
         setattr(request, 'user', self.user)
         self.assertEqual(wishlist, get_or_create_wishlist(request))
+        self.assertEqual(request.session['active_wishlist'], wishlist.id)
+        self.assertEqual(request._wishlist, wishlist)
 
     def test_do_not_share_wishlists(self):
         """"Different users shall never share a wishlist"""
-        setattr(self.request, 'user', self.user)
         wishlist = get_or_create_wishlist(self.request)
-
         request = Mock()
         setattr(request, 'session', {})
         user2 = User.objects.create(username="test2", email="test2@example.com",
@@ -76,14 +76,22 @@ class WishlistsTest(TestCase):
 
     def test_is_product_on_active_wishlist(self):
         """A product IS on the wishlist independently of its variation"""
-        setattr(self.request, 'user', self.user)
         wishlist = get_or_create_wishlist(self.request)
-        wishlist.add_product(self.product, variation={'foo': 'bar'})
+        variation1 = {'foo': 'bar'}
+        variation2 = {'foo': 'baz'}
+        wishlist.add_product(self.product, variation=variation1)
+        wishlist.add_product(self.product, variation=variation2)
         self.assertTrue(is_product_on_active_wishlist(self.request, self.product))
+        items = wishlist.get_all_items()
+        self.assertEqual(len(items), 2)
+        wishlist.delete_item(items[0])
+        self.assertEqual(len(wishlist.get_all_items()), 1)
+        self.assertTrue(is_product_on_active_wishlist(self.request, self.product))
+        wishlist.delete_item(items[1])
+        self.assertFalse(is_product_on_active_wishlist(self.request, self.product))
 
     def test_find_product_on_active_wishlist(self):
         """Products added to the wishlist must be found again"""
-        setattr(self.request, 'user', self.user)
         wishlist = get_or_create_wishlist(self.request)
         variation = {'foo': 'bar'}
         wishlist.add_product(self.product, variation=variation)
@@ -97,9 +105,27 @@ class WishlistsTest(TestCase):
         wishlist.add_product(self.product)
         self.assertEqual(len(wishlist.get_all_items()), 3)
 
+    def test_create_additional_wishlist(self):
+        get_or_create_wishlist(self.request)
+        self.assertEqual(Wishlist.objects.all().count(), 1)
+        wishlist = create_additional_wishlist(self.request)
+        self.assertEqual(Wishlist.objects.all().count(), 2)
+        self.assertEqual(self.request._wishlist, wishlist)
+        self.assertEqual(self.request.session['active_wishlist'], wishlist.id)
+        self.assertEqual(self.request._wishlist, wishlist)        
+
+    def test_switch_wishlist(self):
+        self.assertRaises(exceptions.ObjectDoesNotExist, switch_wishlist, self.request, 987)
+        wishlist1 = get_or_create_wishlist(self.request)
+        wishlist2 = create_additional_wishlist(self.request)
+        self.assertEqual(self.request.session['active_wishlist'], wishlist2.id)
+        self.assertEqual(self.request._wishlist, wishlist2)
+        switch_wishlist(self.request, wishlist1.id)
+        self.assertEqual(self.request.session['active_wishlist'], wishlist1.id)
+        self.assertEqual(self.request._wishlist, wishlist1)
+    
     def test_rename_wishlist(self):
         """Products added to the wishlist must be found again"""
-        setattr(self.request, 'user', self.user)
         self.assertRaises(exceptions.ObjectDoesNotExist, rename_active_wishlist, self.request, 'DEF')
         wishlist = get_or_create_wishlist(self.request)
         self.assertEqual(wishlist.name, _('My wishlist'))
@@ -114,7 +140,6 @@ class WishlistsTest(TestCase):
 
     def test_delete_wishlist(self):
         """Deleting a wishlist also deletes all its items"""
-        setattr(self.request, 'user', self.user)
         self.assertRaises(exceptions.ObjectDoesNotExist, delete_active_wishlist, self.request)
         wishlist = get_or_create_wishlist(self.request)
         wishlist.add_product(self.product)
@@ -133,3 +158,12 @@ class WishlistsTest(TestCase):
         self.assertEqual(Wishlist.objects.all().count(), 1)
         delete_active_wishlist(request)
         self.assertEqual(Wishlist.objects.all().count(), 0)
+
+    def test_tag_select_wishlist(self):
+        """Create a select field with all wishlists"""
+        get_or_create_wishlist(self.request)
+        wishlist = create_additional_wishlist(self.request)
+        context = { 'request': self.request }
+        select_wishlist(context)
+        self.assertEqual(len(context['wishlists']), 2)
+        self.assertEqual(context['active_wishlist'], self.request.session['active_wishlist'])
