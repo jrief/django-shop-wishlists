@@ -9,7 +9,7 @@ def get_or_create_wishlist(request):
     Each user may have one or more wishlists. Find the active one or create one
     with a default name.
     """
-    if not request.user or not request.user.is_authenticated():
+    if request.user is None or not request.user.is_authenticated():
         raise exceptions.PermissionDenied('A wishlist can not be assigned to an anonymous user')
     if not hasattr(request, '_wishlist'):
         active_wishlist = request.session.get('active_wishlist')
@@ -38,6 +38,31 @@ def is_product_on_active_wishlist(request, product):
     return items.exists()
 
 
+def create_additional_wishlist(request, name=None):
+    """
+    Create an additional wishlist and set is as active wishlist.
+    If no name is given (the default), a useful name is assigned to the new wishlist. 
+    """
+    if request.user is None or not request.user.is_authenticated():
+        raise exceptions.PermissionDenied('A wishlist can only be created by an authenticated user')
+    if name is None:
+        name = _('My wishlist %s') % (Wishlist.objects.filter(user=request.user).count()+1)
+    wishlist = Wishlist.objects.create(user=request.user, name=name)
+    request.session['active_wishlist'] = wishlist.id
+    setattr(request, '_wishlist', wishlist)
+    return wishlist
+
+
+def switch_wishlist(request, wishlist_id):
+    """
+    Set the wishlist with the given id as the active wishlist.
+    """
+    wishlist = Wishlist.objects.get(user=request.user, pk=wishlist_id)
+    request.session['active_wishlist'] = wishlist.id
+    setattr(request, '_wishlist', wishlist)
+    return wishlist
+
+
 def rename_active_wishlist(request, name):
     """
     Rename the active wishlist.
@@ -57,8 +82,6 @@ def rename_active_wishlist(request, name):
 def delete_active_wishlist(request):
     """
     Deletes the active wishlist together with all stored items.
-    Resets the active wishlist to the first wishlist for the current user or
-    creates a new one if none exists.
     """
     if hasattr(request, '_wishlist'):
         wishlist = getattr(request, '_wishlist')
@@ -70,3 +93,4 @@ def delete_active_wishlist(request):
         wishlist = Wishlist.objects.get(pk=active_wishlist)
     Wishlist.objects.get(pk=wishlist.id).delete()
     del request.session['active_wishlist']
+
