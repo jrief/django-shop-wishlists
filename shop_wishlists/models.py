@@ -37,7 +37,6 @@ class Wishlist(models.Model):
                            variation=variation, variation_hash=variation_hash)
             item.save()
         self.save() # to get the last updated timestamp for this wishlist
-        return item
 
     def get_all_items(self):
         """
@@ -58,7 +57,7 @@ class Wishlist(models.Model):
         """
         A simple convenience method to delete an item from the wishlist.
         """
-        self.items.get(item).delete()
+        WishlistItem.objects.get(pk=item.id).delete()
         self.save()
 
     def _get_variation_hash(self, variation):
@@ -69,6 +68,7 @@ class Wishlist(models.Model):
         else:
             variation_hash = None
         return variation_hash
+
 
 class WishlistItem(models.Model):
     """
