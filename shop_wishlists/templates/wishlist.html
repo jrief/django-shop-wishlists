@@ -1,0 +1,37 @@
+{% extends "shop/base.html" %}
+{% load i18n %}
+
+{% block body %}
+  <h1>{% trans "Wishlist" %}</h1>
+      <form method="post" action="{% url wishlist_update %}">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% for form in formset %}
+          {{ form.id }}
+        {% endfor %}
+        <table border="1">
+          <thead>
+            <tr>
+              <th>{% trans "Product name" %}</th>
+              <th>{% trans "Unit price" %}</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for form in formset %}
+            <tr>
+              <td>{{ form.instance.product.get_name }}</td>
+              <td>{{ form.instance.product.get_price }}</td>
+              <th>&nbsp;</th>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p><input type="submit" value="{% trans "Update Wishlist" %}"/></p>
+      </form>
+
+      <form action="{% url wishlist_delete %}" method="post">
+        {% csrf_token %}
+        <p><input type="submit" value="{% trans "Delete this wishlist" %}"/></p>
+      </form>
+{% endblock %}

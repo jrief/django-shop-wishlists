@@ -5,5 +5,6 @@ from views import WishlistDetailView
 
 urlpatterns = patterns('',
     url(r'^$', WishlistDetailView.as_view(), name='wishlist'),
-    url(r'^update/$', WishlistDetailView.as_view(action='put'), name='wishlist_update'),
+    url(r'^update/$', WishlistDetailView.as_view(),
+        name='wishlist_update'),
     )
