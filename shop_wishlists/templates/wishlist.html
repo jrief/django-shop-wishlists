@@ -9,7 +9,7 @@ then also does not make any sense.
 {% block body %}
   <h1>{% trans "Wishlist" %}</h1>
       <p></p><form method="get" action="{% url wishlist %}">
-      	{% select_wishlist %} <button type="submit">Go</button>
+      	<label for="select_wishlist">{% trans "Select wishlist" %}: </label>{% select_wishlist %}&nbsp;<button type="submit">Go</button>
       </form></p>
       <form method="post" action="{% url wishlist_remove_item %}">
         {% csrf_token %}
