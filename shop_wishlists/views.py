@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
+from django.core import exceptions
 from django.http import HttpResponse, HttpResponseRedirect
 from shop.views import ShopView, ShopTemplateResponseMixin
 from models import Wishlist
 from forms import get_wishlist_formset
 from utils import get_or_create_wishlist, is_product_on_active_wishlist, \
-    create_additional_wishlist, switch_wishlist, rename_active_wishlist, \
-    delete_active_wishlist
+    copy_item_to_cart, create_additional_wishlist, switch_wishlist, \
+    rename_active_wishlist, delete_active_wishlist
 
 
 class ProductDetailViewMixin(object):
@@ -71,12 +72,14 @@ class WishlistDetailView(ShopTemplateResponseMixin, ShopView):
         context.update({ 'formset': formset })
         return self.render_to_response(context)
 
-    def remove(self):
-        """
-        Remove selected item from wishlist
-        """
-        wishlist = get_or_create_wishlist(self.request)
-        wishlist.delete_item(self.request.POST['item_id'])
+    def post(self, request, *args, **kwargs):
+        if request.POST.has_key('add_to_cart'):
+            copy_item_to_cart(self.request, int(self.request.POST['add_to_cart']))
+        elif request.POST.has_key('remove_item'):
+            wishlist = get_or_create_wishlist(self.request)
+            wishlist.delete_item(int(self.request.POST['remove_item']))
+        else:
+            raise exceptions.FieldError('Missing field in form')
         return self.success()
 
     def rename(self):
