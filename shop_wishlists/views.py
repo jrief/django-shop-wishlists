@@ -68,7 +68,7 @@ class WishlistDetailView(ShopTemplateResponseMixin, ShopView):
         context.update({ 'wishlist_date_created': wishlist.date_created })
         context.update({ 'wishlist_last_updated': wishlist.last_updated })
         formset = get_wishlist_formset(wishlist_items=wishlist.get_all_items())
-        context.update({ 'formset': formset, })
+        context.update({ 'formset': formset })
         return self.render_to_response(context)
 
     def remove(self):
