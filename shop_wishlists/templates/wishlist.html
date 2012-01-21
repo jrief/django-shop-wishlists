@@ -1,9 +1,12 @@
 {% extends "shop/base.html" %}
-{% load i18n %}
+{% load i18n wishlisttags %}
 
 {% block body %}
   <h1>{% trans "Wishlist" %}</h1>
-      <form method="post" action="{% url wishlist_update %}">
+      <p></p><form method="get" action="{% url wishlist %}">
+      	{% select_wishlist %} <button type="submit">Go</button>
+      </form></p>
+      <form method="post" action="{% url wishlist_remove_item %}">
         {% csrf_token %}
         {{ formset.management_form }}
         {% for form in formset %}
@@ -22,16 +25,21 @@
             <tr>
               <td>{{ form.instance.product.get_name }}</td>
               <td>{{ form.instance.product.get_price }}</td>
-              <th>&nbsp;</th>
+              <td><button type="submit" name="item_id" value="{{ form.instance.id }}">{% trans "Remove item" %}</button></td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
-        <p><input type="submit" value="{% trans "Update Wishlist" %}"/></p>
       </form>
-
+      <p><form action="{% url wishlist_rename %}" method="post">
+        {% csrf_token %}
+		<label for="name">{% trans "Rename wishlist to" %}:</label>
+		<input type="text" name="wishlist_name" value="{{ wishlist_name }}" />
+        <button type="submit">Go</button>
+      </form>
       <form action="{% url wishlist_delete %}" method="post">
         {% csrf_token %}
-        <p><input type="submit" value="{% trans "Delete this wishlist" %}"/></p>
+        <button type="submit">{% trans "Delete this wishlist" %}</button>
       </form>
+	  </p>
 {% endblock %}
