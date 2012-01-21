@@ -12,8 +12,9 @@ This module requires a version of django SHOP which offers functionality for
 a simpler integration of products variations, see 
 https://github.com/jrief/django-shop/tree/variations.
 
-* Add `shop_wishlists` to your INSTALLED_APPS in your settings.py
-* Run::
+Add `shop_wishlists` to your INSTALLED_APPS in your settings.py
+
+Run::
    python manage.py schemamigration --initial shop_wishlists
    python manage.py migrate shop_wishlists
 to add the database models.
