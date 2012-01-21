@@ -15,8 +15,10 @@ https://github.com/jrief/django-shop/tree/variations.
 Add `shop_wishlists` to your INSTALLED_APPS in your settings.py
 
 Run::
+
    python manage.py schemamigration --initial shop_wishlists
    python manage.py migrate shop_wishlists
+
 to add the database models.
 For obvious reasons, wishlists can not be assigned to an anonymous user. A
 wishlist must be bound to an authenticated user. Therefore, the shop must offer
@@ -42,7 +44,9 @@ PermissionDenied exception. This exception may be catched, so that the user then
 is redirect onto a login page.
 
 By calling::
+
    utils.get_or_create_wishlist
+
 the default wishlist for the current authenticated customer is created or 
 retrieved from the database. This wishlist then becomes the active wishlist, and
 all of the following operations are applied onto that wishlist::
