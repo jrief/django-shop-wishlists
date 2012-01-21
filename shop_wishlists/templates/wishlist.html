@@ -11,7 +11,7 @@ then also does not make any sense.
       <p></p><form method="get" action="{% url wishlist %}">
       	<label for="select_wishlist">{% trans "Select wishlist" %}: </label>{% select_wishlist %}&nbsp;<button type="submit">Go</button>
       </form></p>
-      <form method="post" action="{% url wishlist_remove_item %}">
+      <form method="post" action="{% url wishlist %}">
         {% csrf_token %}
         {{ formset.management_form }}
         {% for form in formset %}
@@ -32,7 +32,10 @@ then also does not make any sense.
               <td>{{ form.instance.product.get_name }}</td>
               <td>{{ form.instance.variation|describe_variation }}</td>
               <td>{{ form.instance.product.get_price|adjust_price:form.instance.variation }}</td>
-              <td><button type="submit" name="item_id" value="{{ form.instance.id }}">{% trans "Remove item" %}</button></td>
+              <td>
+              	<button type="submit" name="add_to_cart" value="{{ form.instance.id }}">{% trans "Add to cart" %}</button>
+                <button type="submit" name="remove_item" value="{{ form.instance.id }}">{% trans "Remove item" %}</button>
+			  </td>
             </tr>
             {% endfor %}
           </tbody>
