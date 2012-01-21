@@ -50,10 +50,12 @@ By calling::
 the default wishlist for the current authenticated customer is created or 
 retrieved from the database. This wishlist then becomes the active wishlist, and
 all of the following operations are applied onto that wishlist::
-* You may add and remove an item from the wishlist.
-* Copy an item from the wishlist to the cart.
-* Create an additional wishlist, switch between these wishlists, rename the
+
+   * You may add and remove an item from the wishlist.
+   * Copy an item from the wishlist to the cart.
+   * Create an additional wishlist, switch between these wishlists, rename the
 active wishlist and delete it.
+
 Note that items on the wishlist keep the information about their product
 variations, independently from the chosen variation model.
 
