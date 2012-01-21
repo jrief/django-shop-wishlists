@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.utils.translation import ugettext as _
 from django.core import exceptions
+from shop.util.cart import get_or_create_cart
 from shop_wishlists.models import Wishlist, WishlistItem
 
 
@@ -25,7 +26,6 @@ def get_or_create_wishlist(request):
         setattr(request, '_wishlist', wishlist)
     return getattr(request, '_wishlist')
 
-
 def is_product_on_active_wishlist(request, product):
     """
     Returns true if the given product is on the active wishlist.
@@ -37,6 +37,19 @@ def is_product_on_active_wishlist(request, product):
     items = WishlistItem.objects.filter(wishlist=wishlist, product=product)
     return items.exists()
 
+def copy_item_to_cart(request, item_id):
+    """
+    Copy an item from the active wishlist to the cart.
+    """
+    wishlist = get_or_create_wishlist(request)
+    items = WishlistItem.objects.filter(wishlist=wishlist, pk=item_id)
+    if not items.exists():
+        raise exceptions.ObjectDoesNotExist('This item is not member of the active wishlist')
+    product = items[0].product
+    variation = items[0].variation
+    cart = get_or_create_cart(request)
+    cart.add_product(product, 1, variation)
+    cart.save()
 
 def create_additional_wishlist(request, name=None):
     """
@@ -52,7 +65,6 @@ def create_additional_wishlist(request, name=None):
     setattr(request, '_wishlist', wishlist)
     return wishlist
 
-
 def switch_wishlist(request, wishlist_id):
     """
     Set the wishlist with the given id as the active wishlist.
@@ -61,7 +73,6 @@ def switch_wishlist(request, wishlist_id):
     request.session['active_wishlist'] = wishlist.id
     setattr(request, '_wishlist', wishlist)
     return wishlist
-
 
 def rename_active_wishlist(request, name):
     """
@@ -78,7 +89,6 @@ def rename_active_wishlist(request, name):
     wishlist.name = name
     wishlist.save()
 
-
 def delete_active_wishlist(request):
     """
     Deletes the active wishlist together with all stored items.
@@ -93,4 +103,3 @@ def delete_active_wishlist(request):
         wishlist = Wishlist.objects.get(pk=active_wishlist)
     Wishlist.objects.get(pk=wishlist.id).delete()
     del request.session['active_wishlist']
-
