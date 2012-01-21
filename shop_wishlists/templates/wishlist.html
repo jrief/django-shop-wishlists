@@ -1,5 +1,10 @@
 {% extends "shop/base.html" %}
-{% load i18n wishlisttags %}
+{#
+If productvariations are not used, remove 'product_variations', 
+'describe_variation' and 'adjust_price' below. The column "Additional Info"
+then also does not make any sense.
+#}
+{% load i18n wishlisttags product_variations %}
 
 {% block body %}
   <h1>{% trans "Wishlist" %}</h1>
@@ -16,6 +21,7 @@
           <thead>
             <tr>
               <th>{% trans "Product name" %}</th>
+              <th>{% trans "Additional Info" %}</th>
               <th>{% trans "Unit price" %}</th>
               <th>&nbsp;</th>
             </tr>
@@ -24,7 +30,8 @@
             {% for form in formset %}
             <tr>
               <td>{{ form.instance.product.get_name }}</td>
-              <td>{{ form.instance.product.get_price }}</td>
+              <td>{{ form.instance.variation|describe_variation }}</td>
+              <td>{{ form.instance.product.get_price|adjust_price:form.instance.variation }}</td>
               <td><button type="submit" name="item_id" value="{{ form.instance.id }}">{% trans "Remove item" %}</button></td>
             </tr>
             {% endfor %}
