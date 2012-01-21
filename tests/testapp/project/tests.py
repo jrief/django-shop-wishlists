@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.core import exceptions
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from shop.models import CartItem
 from shop.tests.util import Mock
 from shop_wishlists.models import Wishlist, WishlistItem 
 from shop_wishlists.utils import *
@@ -104,6 +105,19 @@ class WishlistsTest(TestCase):
         self.assertEqual(len(wishlist.get_all_items()), 2)
         wishlist.add_product(self.product)
         self.assertEqual(len(wishlist.get_all_items()), 3)
+
+    def test_copy_product_to_cart(self):
+        """Products added to the wishlist must be transferable to the cart"""
+        wishlist = get_or_create_wishlist(self.request)
+        variation = {'foo': 'bar'}
+        wishlist.add_product(self.product, variation=variation)
+        self.assertEqual(len(wishlist.get_all_items()), 1)
+        item = wishlist.get_all_items()[0]
+        copy_item_to_cart(self.request, item.id)
+        cart = get_or_create_cart(self.request)
+        cart_item = CartItem.objects.all()[0]
+        self.assertEqual(self.product, cart_item.product)
+        self.assertEqual(variation, cart_item.variation)        
 
     def test_create_additional_wishlist(self):
         get_or_create_wishlist(self.request)
