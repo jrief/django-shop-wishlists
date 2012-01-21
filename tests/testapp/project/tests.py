@@ -8,8 +8,8 @@ from shop.tests.util import Mock
 from shop_wishlists.models import Wishlist, WishlistItem 
 from shop_wishlists.utils import *
 from shop_wishlists.templatetags.wishlisttags import select_wishlist
-from project.models import DiaryProduct
-from project.views import DiaryDetailView
+from models import DiaryProduct
+from views import DiaryDetailView
 
 
 class WishlistsTest(TestCase):    
@@ -33,7 +33,7 @@ class WishlistsTest(TestCase):
         view = DiaryDetailView()
         setattr(view, 'object', None)
         tmp = view.get_template_names()
-        self.assertEqual(len(tmp), 1)
+        self.assertGreaterEqual(len(tmp), 1)
 
     def test_no_wishlist_for_anonymous_user(self):
         """Wishlists for anonymous users are not allowed"""
@@ -84,10 +84,10 @@ class WishlistsTest(TestCase):
         self.assertTrue(is_product_on_active_wishlist(self.request, self.product))
         items = wishlist.get_all_items()
         self.assertEqual(len(items), 2)
-        wishlist.delete_item(items[0])
+        wishlist.delete_item(items[0].id)
         self.assertEqual(len(wishlist.get_all_items()), 1)
         self.assertTrue(is_product_on_active_wishlist(self.request, self.product))
-        wishlist.delete_item(items[1])
+        wishlist.delete_item(items[1].id)
         self.assertFalse(is_product_on_active_wishlist(self.request, self.product))
 
     def test_find_product_on_active_wishlist(self):
@@ -167,3 +167,4 @@ class WishlistsTest(TestCase):
         select_wishlist(context)
         self.assertEqual(len(context['wishlists']), 2)
         self.assertEqual(context['active_wishlist'], self.request.session['active_wishlist'])
+        self.assertEqual(context['active_wishlist'], wishlist.id)

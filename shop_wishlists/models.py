@@ -53,11 +53,11 @@ class Wishlist(models.Model):
         return WishlistItem.objects.filter(wishlist=self, product=product, 
                                             variation_hash=variation_hash)
 
-    def delete_item(self, item):
+    def delete_item(self, item_id):
         """
         A simple convenience method to delete an item from the wishlist.
         """
-        WishlistItem.objects.get(pk=item.id).delete()
+        WishlistItem.objects.get(pk=item_id).delete()
         self.save()
 
     def _get_variation_hash(self, variation):
