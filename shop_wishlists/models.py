@@ -7,7 +7,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import simplejson as json
 from jsonfield.fields import JSONField
 from shop.models.productmodel import Product
-from shop.models.defaults.bases import BaseCartItem
 
 
 class Wishlist(models.Model):
