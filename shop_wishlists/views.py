@@ -10,19 +10,19 @@ from utils import get_or_create_wishlist, is_product_on_active_wishlist, \
     rename_active_wishlist, delete_active_wishlist
 
 
-class ProductDetailViewMixin(object):
+class WishlistProductDetailViewMixin(object):
     """
     An abstraction class to mix in ProductDetailView for wishlists
     """
     def get_context_data(self, **kwargs):
-        context = super(ProductDetailViewMixin, self).get_context_data(**kwargs)
+        context = super(WishlistProductDetailViewMixin, self).get_context_data(**kwargs)
         product = self.get_object()
         context.update({ 'product_on_active_wishlist': 
                         is_product_on_active_wishlist(self.request, product) })
         return context
 
     def post(self, *args, **kwargs):
-        super(ProductDetailViewMixin, self).post(*args, **kwargs)
+        super(WishlistProductDetailViewMixin, self).post(*args, **kwargs)
         if self.request.POST['product_action'] == 'add_to_wishlist':
             self.add_to_wishlist()
 
