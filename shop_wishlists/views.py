@@ -29,10 +29,7 @@ class WishlistProductDetailViewMixin(object):
     def add_to_wishlist(self):
         wishlist = get_or_create_wishlist(self.request)
         product = self.get_object()
-        if hasattr(self, 'get_variation') and callable(self.get_variation):
-            variation = self.get_variation(product)
-        else:
-            variation = None
+        variation = self.get_variation()
         wishlist.add_product(product, variation)
         wishlist.save()
 
