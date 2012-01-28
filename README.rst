@@ -72,8 +72,8 @@ this will add a button to your products detail view, so that a customer can
 add the product to the wishlist. If variations have been defined for this
 product, these are also stored in the wishlist.
 
-The context of your products detail view contains a boolean variable,
-`product_on_active_wishlist` which is true if the product is already on the
+The context of your products detail view contains an additional boolean variable,
+'product_on_active_wishlist' which is true if the product is already on the
 active wishlist. This is a convenience to inform the customer, if he already
 added the product to the wishlist.
 
