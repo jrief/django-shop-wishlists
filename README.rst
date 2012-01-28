@@ -41,7 +41,7 @@ Run::
    python manage.py schemamigration --initial shop_wishlists
    python manage.py migrate shop_wishlists
 
-to add the tables `shop_wishlist` and `shop_wishlist_item` to the database
+to add the tables ``shop_wishlist`` and ``shop_wishlist_item`` to the database
 models.
 
 Change your code
@@ -73,11 +73,11 @@ add the product to the wishlist. If variations have been defined for this
 product, these are also stored in the wishlist.
 
 The context of your products detail view contains an additional boolean variable,
-'product_on_active_wishlist' which is true if the product is already on the
+``product_on_active_wishlist`` which is true if the product is already on the
 active wishlist. This is a convenience to inform the customer, if he already
 added the product to the wishlist.
 
-If MyProductDetailView defines a post() method, it shall delegate the post
+If MyProductDetailView define a post() method, it shall delegate the post
 request to the mixin class using::
 
     def post(self, *args, **kwargs):
