@@ -23,7 +23,7 @@ Each customer always has one and only one active wishlist. He can add and delete
 products only from this wishlist. A wishlist is created the first time, a
 customer adds a product to a wishlist. If the customer is an anonymous user at
 that time, either redirect him to a  login page in your shop, or disable the
-"Add to wishlist" buttons. 
+``Add to wishlist`` buttons. 
 
 Installation
 ------------
@@ -34,7 +34,7 @@ which offers a simpler interface to products variations.
 Usage
 -----
 
-Add `shop_wishlists` to your INSTALLED_APPS in your settings.py
+Add ``shop_wishlists`` to your ``INSTALLED_APPS`` in your settings.py
 
 Run::
 
@@ -51,7 +51,7 @@ To your urls.py, add the following line::
 
     (r'^shop/wishlist/', include('shop_wishlists.urls')),
 
-Copy the template wishlist.html to your shop and adopt it according to your
+Copy the template ``wishlist.html`` to your shop and adopt it according to your
 needs.
 
 Add to your products detail view the following mixin class::
