@@ -17,8 +17,9 @@ class WishlistProductDetailViewMixin(object):
     def get_context_data(self, **kwargs):
         context = super(WishlistProductDetailViewMixin, self).get_context_data(**kwargs)
         product = self.get_object()
-        context.update({ 'product_on_active_wishlist': 
-                        is_product_on_active_wishlist(self.request, product) })
+        product_active = self.request.user.is_authenticated() and \
+            is_product_on_active_wishlist(self.request, product)
+        context.update({ 'product_on_active_wishlist': product_active })
         return context
 
     def post(self, *args, **kwargs):
